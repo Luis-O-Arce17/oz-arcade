@@ -11,6 +11,9 @@ const GRID_SIZE = 20;
 const CELL_SIZE = BOARD_SIZE / GRID_SIZE;
 
 const INITIAL_MOVE_INTERVAL = 180;
+const MIN_MOVE_INTERVAL = 90;
+const SPEED_UP_EVERY_POINTS = 50;
+const SPEED_STEP = 15;
 
 const FOOD_SCORE = 10;
 const FOOD_COLOR = "#ff5c7a";
@@ -141,6 +144,9 @@ let direction = DIRECTIONS.RIGHT;
 let nextDirection = DIRECTIONS.RIGHT;
 
 let canChangeDirection = true;
+
+let moveInterval =
+    INITIAL_MOVE_INTERVAL;
 
 let lastMoveTime = 0;
 let animationFrameId = null;
@@ -315,6 +321,25 @@ function updateHighScoreDisplay() {
 }
 
 
+function updateMoveInterval() {
+    const speedLevel =
+        Math.floor(
+            score /
+            SPEED_UP_EVERY_POINTS
+        );
+
+    const newInterval =
+        INITIAL_MOVE_INTERVAL -
+        speedLevel * SPEED_STEP;
+
+    moveInterval =
+        Math.max(
+            newInterval,
+            MIN_MOVE_INTERVAL
+        );
+}
+
+
 function saveHighScoreIfNeeded() {
     if (score <= highScore) {
         return;
@@ -427,6 +452,7 @@ function moveSnake() {
         score += FOOD_SCORE;
 
         updateScoreDisplay();
+        updateMoveInterval();
 
         food = createFood();
     } else {
@@ -449,7 +475,7 @@ function gameLoop(timestamp) {
 
     if (
         elapsedTime >=
-        INITIAL_MOVE_INTERVAL
+        moveInterval
     ) {
         moveSnake();
         renderGame();
@@ -486,6 +512,9 @@ function startGame() {
     createInitialSnake();
 
     score = 0;
+
+    moveInterval =
+        INITIAL_MOVE_INTERVAL;
 
     updateScoreDisplay();
 

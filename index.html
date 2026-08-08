@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="OzArcade is a browser-based collection of classic-inspired arcade games."
+    >
+
+    <title>OzArcade</title>
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <div class="brand-container">
+                <a class="brand" href="index.html">
+                    OzArcade
+                </a>
+
+                <p
+                    class="tagline"
+                    data-i18n="tagline"
+                >
+                    Classic games. Built for the web.
+                </p>
+            </div>
+
+            <button
+                id="language-toggle"
+                class="language-button"
+                type="button"
+                aria-label="Change language"
+            >
+                ES
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <p
+                class="hero-label"
+                data-i18n="heroLabel"
+            >
+                ARCADE COLLECTION
+            </p>
+
+            <h1 data-i18n="heroTitle">
+                Choose your game
+            </h1>
+
+            <p
+                class="hero-description"
+                data-i18n="heroDescription"
+            >
+                Play classic-inspired games directly in your browser.
+            </p>
+        </section>
+
+        <section
+            class="catalog-section"
+            aria-labelledby="catalog-title"
+        >
+            <div class="section-heading">
+                <h2
+                    id="catalog-title"
+                    data-i18n="catalogTitle"
+                >
+                    Games
+                </h2>
+
+                <p data-i18n="catalogDescription">
+                    New titles will be added as OzArcade grows.
+                </p>
+            </div>
+
+            <div
+                id="game-catalog"
+                class="game-catalog"
+                aria-live="polite"
+            ></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>
+            <span>OzArcade</span>
+            <span data-i18n="footerText">
+                Browser Arcade
+            </span>
+        </p>
+    </footer>
+
+    <script
+        type="module"
+        src="js/catalog.js"
+    ></script>
+</body>
+
+</html>

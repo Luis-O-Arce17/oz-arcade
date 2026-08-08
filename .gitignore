@@ -1,0 +1,14 @@
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Visual Studio Code
+.vscode/
+
+# Temporary files
+*.tmp
+*.log
+
+# Reference project
+Game_Atari_Asteroids-main.zip
+Game_Atari_Asteroids-main*/

@@ -25,13 +25,25 @@
             <a
                 class="back-link"
                 href="../../index.html"
+                data-i18n="backToArcade"
             >
                 Back to OzArcade
             </a>
 
-            <div class="game-title">
-                <span class="game-label">OzArcade</span>
-                <h1>Snake</h1>
+            <div class="header-actions">
+                <button
+                    id="language-toggle"
+                    class="language-button"
+                    type="button"
+                    aria-label="Change language"
+                >
+                    ES
+                </button>
+
+                <div class="game-title">
+                    <span class="game-label">OzArcade</span>
+                    <h1>Snake</h1>
+                </div>
             </div>
         </div>
     </header>
@@ -40,12 +52,24 @@
         <section class="game-panel">
             <div class="scoreboard">
                 <div class="score-item">
-                    <span class="score-label">Score</span>
+                    <span
+                        class="score-label"
+                        data-i18n="score"
+                    >
+                        Score
+                    </span>
+
                     <strong id="score">0</strong>
                 </div>
 
                 <div class="score-item">
-                    <span class="score-label">High Score</span>
+                    <span
+                        class="score-label"
+                        data-i18n="highScore"
+                    >
+                        High Score
+                    </span>
+
                     <strong id="high-score">0</strong>
                 </div>
             </div>
@@ -65,7 +89,10 @@
                     class="game-message"
                 >
                     <p>Snake</p>
-                    <span>Game board ready</span>
+
+                    <span data-i18n="boardReady">
+                        Game board ready
+                    </span>
                 </div>
             </div>
 
@@ -74,6 +101,7 @@
                     id="start-button"
                     class="primary-button"
                     type="button"
+                    data-i18n="start"
                 >
                     Start
                 </button>
@@ -82,6 +110,7 @@
                     id="pause-button"
                     class="secondary-button"
                     type="button"
+                    data-i18n="pause"
                     disabled
                 >
                     Pause
@@ -90,44 +119,80 @@
         </section>
 
         <aside class="controls-panel">
-            <h2>Controls</h2>
+            <h2 data-i18n="controls">
+                Controls
+            </h2>
 
             <div class="control-list">
                 <div class="control-row">
-                    <span>Move Up</span>
+                    <span data-i18n="moveUp">
+                        Move Up
+                    </span>
+
                     <kbd>W</kbd>
-                    <span>or</span>
+
+                    <span data-i18n="or">
+                        or
+                    </span>
+
                     <kbd>↑</kbd>
                 </div>
 
                 <div class="control-row">
-                    <span>Move Down</span>
+                    <span data-i18n="moveDown">
+                        Move Down
+                    </span>
+
                     <kbd>S</kbd>
-                    <span>or</span>
+
+                    <span data-i18n="or">
+                        or
+                    </span>
+
                     <kbd>↓</kbd>
                 </div>
 
                 <div class="control-row">
-                    <span>Move Left</span>
+                    <span data-i18n="moveLeft">
+                        Move Left
+                    </span>
+
                     <kbd>A</kbd>
-                    <span>or</span>
+
+                    <span data-i18n="or">
+                        or
+                    </span>
+
                     <kbd>←</kbd>
                 </div>
 
                 <div class="control-row">
-                    <span>Move Right</span>
+                    <span data-i18n="moveRight">
+                        Move Right
+                    </span>
+
                     <kbd>D</kbd>
-                    <span>or</span>
+
+                    <span data-i18n="or">
+                        or
+                    </span>
+
                     <kbd>→</kbd>
                 </div>
 
                 <div class="control-row">
-                    <span>Pause</span>
+                    <span data-i18n="pause">
+                        Pause
+                    </span>
+
                     <kbd>P</kbd>
                 </div>
             </div>
 
-            <p class="controls-note">
+            <p
+                class="controls-note"
+                data-i18n="controlsNote"
+            >
                 Collect food, grow and avoid colliding with the walls
                 or your own body.
             </p>

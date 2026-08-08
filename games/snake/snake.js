@@ -38,6 +38,10 @@ const translations = {
         start: "Start",
         pause: "Pause",
         resume: "Resume",
+        gameOver: "Game Over",
+        playAgain: "Play Again",
+        restartHint:
+            "Press Play Again to start a new game.",
         controls: "Controls",
         moveUp: "Move Up",
         moveDown: "Move Down",
@@ -60,6 +64,10 @@ const translations = {
         start: "Iniciar",
         pause: "Pausa",
         resume: "Continuar",
+        gameOver: "Fin del juego",
+        playAgain: "Jugar de nuevo",
+        restartHint:
+            "Pulsa Jugar de nuevo para iniciar una nueva partida.",
         controls: "Controles",
         moveUp: "Arriba",
         moveDown: "Abajo",
@@ -93,6 +101,12 @@ const pauseButton =
 
 const gameMessage =
     document.querySelector("#game-message");
+
+const gameMessageTitle =
+    gameMessage.querySelector("p");
+
+const gameMessageText =
+    gameMessage.querySelector("span");
 
 
 let currentLanguage = getLanguage();
@@ -178,6 +192,50 @@ function renderGame() {
 }
 
 
+function hasWallCollision(position) {
+    return (
+        position.x < 0 ||
+        position.x >= GRID_SIZE ||
+        position.y < 0 ||
+        position.y >= GRID_SIZE
+    );
+}
+
+
+function hasSelfCollision(position) {
+    return snake
+        .slice(0, -1)
+        .some((segment) => {
+            return (
+                segment.x === position.x &&
+                segment.y === position.y
+            );
+        });
+}
+
+
+function endGame() {
+    gameState = GAME_STATE.GAME_OVER;
+
+    animationFrameId = null;
+
+    pauseButton.disabled = true;
+
+    startButton.disabled = false;
+
+    startButton.textContent =
+        translations[currentLanguage].playAgain;
+
+    gameMessageTitle.textContent =
+        translations[currentLanguage].gameOver;
+
+    gameMessageText.textContent =
+        translations[currentLanguage].restartHint;
+
+    gameMessage.classList.remove("hidden");
+}
+
+
 function moveSnake() {
     direction = nextDirection;
 
@@ -187,6 +245,14 @@ function moveSnake() {
         x: head.x + direction.x,
         y: head.y + direction.y
     };
+
+    if (
+        hasWallCollision(newHead) ||
+        hasSelfCollision(newHead)
+    ) {
+        endGame();
+        return;
+    }
 
     snake.unshift(newHead);
     snake.pop();
@@ -209,6 +275,11 @@ function gameLoop(timestamp) {
         lastMoveTime = timestamp;
     }
 
+    if (gameState !== GAME_STATE.PLAYING) {
+        animationFrameId = null;
+        return;
+    }
+
     animationFrameId =
         requestAnimationFrame(gameLoop);
 }
@@ -224,9 +295,18 @@ function startGame() {
 
     gameState = GAME_STATE.PLAYING;
 
+    gameMessageTitle.textContent = "Snake";
+
+    gameMessageText.textContent =
+        translations[currentLanguage].boardReady;
+
     gameMessage.classList.add("hidden");
 
     startButton.disabled = true;
+
+    startButton.textContent =
+        translations[currentLanguage].start;
+
     pauseButton.disabled = false;
 
     pauseButton.textContent =
@@ -358,6 +438,17 @@ function updateLanguage() {
     if (gameState === GAME_STATE.PAUSED) {
         pauseButton.textContent =
             translations[currentLanguage].resume;
+    }
+
+    if (gameState === GAME_STATE.GAME_OVER) {
+        startButton.textContent =
+            translations[currentLanguage].playAgain;
+
+        gameMessageTitle.textContent =
+            translations[currentLanguage].gameOver;
+
+        gameMessageText.textContent =
+            translations[currentLanguage].restartHint;
     }
 }
 

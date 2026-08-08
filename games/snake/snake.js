@@ -12,6 +12,12 @@ const CELL_SIZE = BOARD_SIZE / GRID_SIZE;
 
 const INITIAL_MOVE_INTERVAL = 180;
 
+const FOOD_SCORE = 10;
+const FOOD_COLOR = "#ff5c7a";
+
+const HIGH_SCORE_STORAGE_KEY =
+    "ozarcade_snake_highscore";
+
 
 const GAME_STATE = {
     READY: "ready",
@@ -108,15 +114,33 @@ const gameMessageTitle =
 const gameMessageText =
     gameMessage.querySelector("span");
 
+const scoreElement =
+    document.querySelector("#score");
+
+const highScoreElement =
+    document.querySelector("#high-score");
+
 
 let currentLanguage = getLanguage();
 
 let gameState = GAME_STATE.READY;
 
 let snake = [];
+let food = null;
+
+let score = 0;
+
+let highScore =
+    Number(
+        localStorage.getItem(
+            HIGH_SCORE_STORAGE_KEY
+        )
+    ) || 0;
 
 let direction = DIRECTIONS.RIGHT;
 let nextDirection = DIRECTIONS.RIGHT;
+
+let canChangeDirection = true;
 
 let lastMoveTime = 0;
 let animationFrameId = null;
@@ -131,6 +155,57 @@ function createInitialSnake() {
 
     direction = DIRECTIONS.RIGHT;
     nextDirection = DIRECTIONS.RIGHT;
+
+    canChangeDirection = true;
+}
+
+
+function positionsMatch(
+    firstPosition,
+    secondPosition
+) {
+    return (
+        firstPosition.x === secondPosition.x &&
+        firstPosition.y === secondPosition.y
+    );
+}
+
+
+function isPositionOnSnake(position) {
+    return snake.some((segment) => {
+        return positionsMatch(
+            segment,
+            position
+        );
+    });
+}
+
+
+function createFood() {
+    if (
+        snake.length >=
+        GRID_SIZE * GRID_SIZE
+    ) {
+        return null;
+    }
+
+    let newFood;
+
+    do {
+        newFood = {
+            x: Math.floor(
+                Math.random() * GRID_SIZE
+            ),
+
+            y: Math.floor(
+                Math.random() * GRID_SIZE
+            )
+        };
+    } while (
+        isPositionOnSnake(newFood)
+    );
+
+    return newFood;
 }
 
 
@@ -169,26 +244,90 @@ function drawBoard() {
 }
 
 
-function drawSnake() {
-    snake.forEach((segment, index) => {
-        context.fillStyle =
-            index === 0
-                ? "#62e6a7"
-                : "#3dbf86";
+function drawFood() {
+    if (food === null) {
+        return;
+    }
 
-        context.fillRect(
-            segment.x * CELL_SIZE + 2,
-            segment.y * CELL_SIZE + 2,
-            CELL_SIZE - 4,
-            CELL_SIZE - 4
-        );
-    });
+    const centerX =
+        food.x * CELL_SIZE +
+        CELL_SIZE / 2;
+
+    const centerY =
+        food.y * CELL_SIZE +
+        CELL_SIZE / 2;
+
+    const radius =
+        CELL_SIZE * 0.32;
+
+    context.fillStyle =
+        FOOD_COLOR;
+
+    context.beginPath();
+
+    context.arc(
+        centerX,
+        centerY,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    context.fill();
+}
+
+
+function drawSnake() {
+    snake.forEach(
+        (segment, index) => {
+            context.fillStyle =
+                index === 0
+                    ? "#62e6a7"
+                    : "#3dbf86";
+
+            context.fillRect(
+                segment.x * CELL_SIZE + 2,
+                segment.y * CELL_SIZE + 2,
+                CELL_SIZE - 4,
+                CELL_SIZE - 4
+            );
+        }
+    );
 }
 
 
 function renderGame() {
     drawBoard();
+    drawFood();
     drawSnake();
+}
+
+
+function updateScoreDisplay() {
+    scoreElement.textContent =
+        score;
+}
+
+
+function updateHighScoreDisplay() {
+    highScoreElement.textContent =
+        highScore;
+}
+
+
+function saveHighScoreIfNeeded() {
+    if (score <= highScore) {
+        return;
+    }
+
+    highScore = score;
+
+    localStorage.setItem(
+        HIGH_SCORE_STORAGE_KEY,
+        highScore
+    );
+
+    updateHighScoreDisplay();
 }
 
 
@@ -202,20 +341,31 @@ function hasWallCollision(position) {
 }
 
 
-function hasSelfCollision(position) {
-    return snake
-        .slice(0, -1)
-        .some((segment) => {
-            return (
-                segment.x === position.x &&
-                segment.y === position.y
+function hasSelfCollision(
+    position,
+    willGrow
+) {
+    const segmentsToCheck =
+        willGrow
+            ? snake
+            : snake.slice(0, -1);
+
+    return segmentsToCheck.some(
+        (segment) => {
+            return positionsMatch(
+                segment,
+                position
             );
-        });
+        }
+    );
 }
 
 
 function endGame() {
-    gameState = GAME_STATE.GAME_OVER;
+    gameState =
+        GAME_STATE.GAME_OVER;
+
+    saveHighScoreIfNeeded();
 
     animationFrameId = null;
 
@@ -224,20 +374,27 @@ function endGame() {
     startButton.disabled = false;
 
     startButton.textContent =
-        translations[currentLanguage].playAgain;
+        translations[currentLanguage]
+            .playAgain;
 
     gameMessageTitle.textContent =
-        translations[currentLanguage].gameOver;
+        translations[currentLanguage]
+            .gameOver;
 
     gameMessageText.textContent =
-        translations[currentLanguage].restartHint;
+        translations[currentLanguage]
+            .restartHint;
 
-    gameMessage.classList.remove("hidden");
+    gameMessage.classList.remove(
+        "hidden"
+    );
 }
 
 
 function moveSnake() {
     direction = nextDirection;
+
+    canChangeDirection = true;
 
     const head = snake[0];
 
@@ -246,21 +403,43 @@ function moveSnake() {
         y: head.y + direction.y
     };
 
+    const willEatFood =
+        food !== null &&
+        positionsMatch(
+            newHead,
+            food
+        );
+
     if (
         hasWallCollision(newHead) ||
-        hasSelfCollision(newHead)
+        hasSelfCollision(
+            newHead,
+            willEatFood
+        )
     ) {
         endGame();
         return;
     }
 
     snake.unshift(newHead);
-    snake.pop();
+
+    if (willEatFood) {
+        score += FOOD_SCORE;
+
+        updateScoreDisplay();
+
+        food = createFood();
+    } else {
+        snake.pop();
+    }
 }
 
 
 function gameLoop(timestamp) {
-    if (gameState !== GAME_STATE.PLAYING) {
+    if (
+        gameState !==
+        GAME_STATE.PLAYING
+    ) {
         animationFrameId = null;
         return;
     }
@@ -268,108 +447,193 @@ function gameLoop(timestamp) {
     const elapsedTime =
         timestamp - lastMoveTime;
 
-    if (elapsedTime >= INITIAL_MOVE_INTERVAL) {
+    if (
+        elapsedTime >=
+        INITIAL_MOVE_INTERVAL
+    ) {
         moveSnake();
         renderGame();
 
         lastMoveTime = timestamp;
     }
 
-    if (gameState !== GAME_STATE.PLAYING) {
+    if (
+        gameState !==
+        GAME_STATE.PLAYING
+    ) {
         animationFrameId = null;
         return;
     }
 
     animationFrameId =
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(
+            gameLoop
+        );
 }
 
 
 function startGame() {
-    if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
+    if (
+        animationFrameId !== null
+    ) {
+        cancelAnimationFrame(
+            animationFrameId
+        );
+
         animationFrameId = null;
     }
 
     createInitialSnake();
 
-    gameState = GAME_STATE.PLAYING;
+    score = 0;
 
-    gameMessageTitle.textContent = "Snake";
+    updateScoreDisplay();
+
+    food = createFood();
+
+    gameState =
+        GAME_STATE.PLAYING;
+
+    gameMessageTitle.textContent =
+        "Snake";
 
     gameMessageText.textContent =
-        translations[currentLanguage].boardReady;
+        translations[currentLanguage]
+            .boardReady;
 
-    gameMessage.classList.add("hidden");
+    gameMessage.classList.add(
+        "hidden"
+    );
 
     startButton.disabled = true;
 
     startButton.textContent =
-        translations[currentLanguage].start;
+        translations[currentLanguage]
+            .start;
 
     pauseButton.disabled = false;
 
     pauseButton.textContent =
-        translations[currentLanguage].pause;
+        translations[currentLanguage]
+            .pause;
 
-    lastMoveTime = performance.now();
+    lastMoveTime =
+        performance.now();
 
     renderGame();
 
     animationFrameId =
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(
+            gameLoop
+        );
 }
 
 
 function pauseGame() {
-    if (gameState === GAME_STATE.PLAYING) {
-        gameState = GAME_STATE.PAUSED;
+    if (
+        gameState ===
+        GAME_STATE.PLAYING
+    ) {
+        gameState =
+            GAME_STATE.PAUSED;
 
         pauseButton.textContent =
-            translations[currentLanguage].resume;
+            translations[currentLanguage]
+                .resume;
 
         return;
     }
 
-    if (gameState === GAME_STATE.PAUSED) {
-        gameState = GAME_STATE.PLAYING;
+    if (
+        gameState ===
+        GAME_STATE.PAUSED
+    ) {
+        gameState =
+            GAME_STATE.PLAYING;
 
         pauseButton.textContent =
-            translations[currentLanguage].pause;
+            translations[currentLanguage]
+                .pause;
 
-        lastMoveTime = performance.now();
+        lastMoveTime =
+            performance.now();
 
-        if (animationFrameId === null) {
+        if (
+            animationFrameId === null
+        ) {
             animationFrameId =
-                requestAnimationFrame(gameLoop);
+                requestAnimationFrame(
+                    gameLoop
+                );
         }
     }
 }
 
 
-function isOppositeDirection(newDirection) {
+function isOppositeDirection(
+    newDirection
+) {
     return (
-        newDirection.x === -direction.x &&
-        newDirection.y === -direction.y
+        newDirection.x ===
+            -direction.x &&
+        newDirection.y ===
+            -direction.y
     );
 }
 
 
-function changeDirection(newDirection) {
-    if (gameState !== GAME_STATE.PLAYING) {
+function isSameDirection(
+    newDirection
+) {
+    return (
+        newDirection.x ===
+            nextDirection.x &&
+        newDirection.y ===
+            nextDirection.y
+    );
+}
+
+
+function changeDirection(
+    newDirection
+) {
+    if (
+        gameState !==
+        GAME_STATE.PLAYING
+    ) {
         return;
     }
 
-    if (isOppositeDirection(newDirection)) {
+    if (
+        isSameDirection(
+            newDirection
+        )
+    ) {
         return;
     }
 
-    nextDirection = newDirection;
+    if (!canChangeDirection) {
+        return;
+    }
+
+    if (
+        isOppositeDirection(
+            newDirection
+        )
+    ) {
+        return;
+    }
+
+    nextDirection =
+        newDirection;
+
+    canChangeDirection = false;
 }
 
 
 function handleKeyDown(event) {
-    const key = event.key.toLowerCase();
+    const key =
+        event.key.toLowerCase();
 
     const directionKeys = [
         "arrowup",
@@ -382,29 +646,39 @@ function handleKeyDown(event) {
         "d"
     ];
 
-    if (directionKeys.includes(key)) {
+    if (
+        directionKeys.includes(key)
+    ) {
         event.preventDefault();
     }
 
     switch (key) {
         case "arrowup":
         case "w":
-            changeDirection(DIRECTIONS.UP);
+            changeDirection(
+                DIRECTIONS.UP
+            );
             break;
 
         case "arrowdown":
         case "s":
-            changeDirection(DIRECTIONS.DOWN);
+            changeDirection(
+                DIRECTIONS.DOWN
+            );
             break;
 
         case "arrowleft":
         case "a":
-            changeDirection(DIRECTIONS.LEFT);
+            changeDirection(
+                DIRECTIONS.LEFT
+            );
             break;
 
         case "arrowright":
         case "d":
-            changeDirection(DIRECTIONS.RIGHT);
+            changeDirection(
+                DIRECTIONS.RIGHT
+            );
             break;
 
         case "p":
@@ -427,37 +701,53 @@ function updateLanguage() {
 
     languageButton.setAttribute(
         "aria-label",
-        translations[currentLanguage].changeLanguage
+        translations[currentLanguage]
+            .changeLanguage
     );
 
     canvas.setAttribute(
         "aria-label",
-        translations[currentLanguage].canvasLabel
+        translations[currentLanguage]
+            .canvasLabel
     );
 
-    if (gameState === GAME_STATE.PAUSED) {
+    if (
+        gameState ===
+        GAME_STATE.PAUSED
+    ) {
         pauseButton.textContent =
-            translations[currentLanguage].resume;
+            translations[currentLanguage]
+                .resume;
     }
 
-    if (gameState === GAME_STATE.GAME_OVER) {
+    if (
+        gameState ===
+        GAME_STATE.GAME_OVER
+    ) {
         startButton.textContent =
-            translations[currentLanguage].playAgain;
+            translations[currentLanguage]
+                .playAgain;
 
         gameMessageTitle.textContent =
-            translations[currentLanguage].gameOver;
+            translations[currentLanguage]
+                .gameOver;
 
         gameMessageText.textContent =
-            translations[currentLanguage].restartHint;
+            translations[currentLanguage]
+                .restartHint;
     }
 }
 
 
 function changeLanguage() {
     currentLanguage =
-        getNextLanguage(currentLanguage);
+        getNextLanguage(
+            currentLanguage
+        );
 
-    setLanguage(currentLanguage);
+    setLanguage(
+        currentLanguage
+    );
 
     updateLanguage();
 }
@@ -485,5 +775,9 @@ document.addEventListener(
 
 
 createInitialSnake();
+
+updateScoreDisplay();
+updateHighScoreDisplay();
+
 renderGame();
 updateLanguage();

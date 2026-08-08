@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Play Snake in OzArcade."
+    >
+
+    <title>Snake | OzArcade</title>
+
+    <link rel="stylesheet" href="snake.css">
+</head>
+
+<body>
+    <header class="game-header">
+        <div class="header-content">
+            <a
+                class="back-link"
+                href="../../index.html"
+            >
+                Back to OzArcade
+            </a>
+
+            <div class="game-title">
+                <span class="game-label">OzArcade</span>
+                <h1>Snake</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="game-page">
+        <section class="game-panel">
+            <div class="scoreboard">
+                <div class="score-item">
+                    <span class="score-label">Score</span>
+                    <strong id="score">0</strong>
+                </div>
+
+                <div class="score-item">
+                    <span class="score-label">High Score</span>
+                    <strong id="high-score">0</strong>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas
+                    id="game-canvas"
+                    width="500"
+                    height="500"
+                    aria-label="Snake game board"
+                >
+                    Your browser does not support HTML Canvas.
+                </canvas>
+
+                <div
+                    id="game-message"
+                    class="game-message"
+                >
+                    <p>Snake</p>
+                    <span>Game board ready</span>
+                </div>
+            </div>
+
+            <div class="game-actions">
+                <button
+                    id="start-button"
+                    class="primary-button"
+                    type="button"
+                >
+                    Start
+                </button>
+
+                <button
+                    id="pause-button"
+                    class="secondary-button"
+                    type="button"
+                    disabled
+                >
+                    Pause
+                </button>
+            </div>
+        </section>
+
+        <aside class="controls-panel">
+            <h2>Controls</h2>
+
+            <div class="control-list">
+                <div class="control-row">
+                    <span>Move Up</span>
+                    <kbd>W</kbd>
+                    <span>or</span>
+                    <kbd>↑</kbd>
+                </div>
+
+                <div class="control-row">
+                    <span>Move Down</span>
+                    <kbd>S</kbd>
+                    <span>or</span>
+                    <kbd>↓</kbd>
+                </div>
+
+                <div class="control-row">
+                    <span>Move Left</span>
+                    <kbd>A</kbd>
+                    <span>or</span>
+                    <kbd>←</kbd>
+                </div>
+
+                <div class="control-row">
+                    <span>Move Right</span>
+                    <kbd>D</kbd>
+                    <span>or</span>
+                    <kbd>→</kbd>
+                </div>
+
+                <div class="control-row">
+                    <span>Pause</span>
+                    <kbd>P</kbd>
+                </div>
+            </div>
+
+            <p class="controls-note">
+                Collect food, grow and avoid colliding with the walls
+                or your own body.
+            </p>
+        </aside>
+    </main>
+
+    <script
+        type="module"
+        src="snake.js"
+    ></script>
+</body>
+
+</html>
